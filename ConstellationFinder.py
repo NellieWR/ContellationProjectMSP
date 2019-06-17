@@ -12,21 +12,15 @@ import matplotlib.pyplot as plt
 def FindStars(name):
     npim = ProcessImage(name)
     clid, clim = FrameMaker(npim)
-    centers = ClusterStart(clid, clim)
+    clid, centers = ClusterStart(clid, clim)
     for n in range(centers.shape[0]):
         for m in range(centers.shape[1]-1):
-            centers[n][m] = centers[n][m]/centers[n][3]
- 
-
-    implot = plt.imshow(npim)
-
-
-    for n in range(centers.shape[0]):
-        plt.scatter([centers[n][1]-1], [centers[n][0]-1], c='r', s=1)
-
-    plt.show()
+            centers[n][m] = centers[n][m]/centers[n][3] -1
+            
     
-    return npim, clid, clim, centers
+    
+    
+    return npim, clid, clim, centers 
 
 
 
@@ -92,45 +86,51 @@ def FrameMaker(npim):
     return clid, clim
 
 def ClusterStart(clid, clim):
-    inc = 0 # Keeps track of the cluster number.
-    centers = np.zeros((0, 4)) # Creates an array of zeroes to store cluster info.
-    for n in range(1, clid.shape[0]-2):
-        for m in range(1, clid.shape[1]-2):
-            if clid[n, m]==0:
-                #print("Found cluster")
-                centers, clid = ClusterSize(clid, clim, centers, n, m, inc)
-                inc = inc+1
-                #print(inc)
-    print("Clusters identified: ",centers.shape[0])
-    return centers
+    cont = True
+    inc  = 1
+    while cont:
+        cont = False
+        #print("enter")
+        for n in range(1,clid.shape[0]-2):
+            for m in range(1,clid.shape[1]-2):
+                
+                if -1 <clid[n, m]:
+                    check = np.zeros((1,0))
+                
+                    for i in range(n-1,n+2):
+                        for j in range(m-1,m+2):
+                        
+                            if clid[i,j]>0:
+                                check = np.append(check, np.array([[clid[i,j]]]), axis = 1)
+                    #print(check)
+                    if check.shape[1] == 0:
+                        minimum = inc
+                        inc = inc + 1
+                        clid[n,m] = minimum
+                        cont = True
+                        
+                    else:
+                        minimum = np.amin(check)
+                        
+                        if minimum < clid[n,m] or clid[n,m]==0:
+                            clid[n,m] = minimum
+                            cont = True
+                    #print(minimum)
+                        
+     
 
-def ClusterSize(clid, clim, centers, n, m, inc):
-    #print(inc)
-    clid[n, m] = inc # Numbers the found cluster.
-    if  inc>=centers.shape[0]: # Implies that cluster has been identified.
-        #print(centers.shape[0])
-        centers = np.append(centers, np.array([[n, m, clim[n, m], 1]]), axis = 0) # Adds a row with one cluster's information.
-        #print(centers)
-        #print(centers.shape[0])
-    else: # Implies that the cluster creation hsa already started in a previous iteration.
-        centers[inc, 0] = centers[inc, 0]+n # Update the center's x-value.
-        centers[inc, 1] = centers[inc, 1]+m # Update the center's y-value.
-        centers[inc, 2] = centers[inc, 2]+clim[n, m] # Update the centers'brightness.
-        centers[inc, 3] = centers[inc, 3]+1 # Update the cluster's amount of pixels.
-    if clid[n-1, m]==0:
-        centers, clid = ClusterSize(clid, clim, centers, n-1, m, inc)
-    if clid[n+1, m]==0:
-        centers, clid = ClusterSize(clid, clim, centers, n+1, m, inc)
-    if clid[n-1, m-1]==0:
-        centers, clid = ClusterSize(clid, clim, centers, n-1, m-1, inc)
-    if clid[n-1, m+1]==0:
-        centers, clid = ClusterSize(clid, clim, centers, n-1, m+1, inc)
-    if clid[n+1, m-1]==0:
-        centers, clid = ClusterSize(clid, clim, centers, n+1, m-1, inc)
-    if clid[n+1, m+1]==0:
-        centers, clid = ClusterSize(clid, clim, centers, n+1, m+1, inc)
-    if clid[n, m+1]==0:
-        centers, clid = ClusterSize(clid, clim, centers, n, m+1, inc)
-    if clid[n, m-1]==0:
-        centers, clid = ClusterSize(clid, clim, centers, n, m-1, inc)
-    return centers, clid
+    centers = np.zeros((inc,4))
+    for n in range(1,clid.shape[0]-2):
+            for m in range(1,clid.shape[1]-2):
+                if clid[n,m] > 0:
+                    centers[int(clid[n,m])-1,0] = centers[int(clid[n,m])-1,0] + n
+                    centers[int(clid[n,m])-1,1] = centers[int(clid[n,m])-1,1] + m
+                    centers[int(clid[n,m])-1,2] = centers[int(clid[n,m])-1,2] + int(clid[n,m])
+                    centers[int(clid[n,m])-1,3] = centers[int(clid[n,m])-1,3] + 1
+    
+    C = np.zeros((0,4))
+    for n in range(centers.shape[0]):
+        if centers[n,3] !=0:
+            C = np.append(C,np.array([centers[n,:]]), axis = 0)
+                
+    return clid, C
