@@ -15,9 +15,14 @@ import sys
 import time
 
 def FindStars(name):
+    print("FrameMaker")
     clid, clim = FrameMaker(ProcessImage(name))
+    print("ClusterStart")
     clid, centers = ClusterStart(clid, clim)
-    ratios = Ratios(centers)                   
+    print(centers.shape[0])
+    print("Ratios")
+    ratios = Ratios(centers)     
+    print("ReadDir")              
     constellations = ReadDir()
 
     return clid, clim, centers, constellations, ratios 
@@ -86,26 +91,23 @@ def FrameMaker(npim):
     return clid, clim
 
 def ClusterStart(clid, clim):
-    cont = True
+    cont = True # State variable that indicates if there has been a change in the clustering
     inc  = 1
     while cont:
         cont = False
-        #print("enter")
-        for n in range(1,clid.shape[0]-2):
-            for m in range(1,clid.shape[1]-2):
+        for n in range(1,clid.shape[0]-2): # For each row of the id matrix
+            for m in range(1,clid.shape[1]-2): # For each column of the id matrix
+                if -1 <clid[n, m]: # Checks if the location is valid
+                    check = np.zeros((1,0)) # Creates a matrix that will hold the values of the matrix cells surrounding the current one
                 
-                if -1 <clid[n, m]:
-                    check = np.zeros((1,0))
-                
-                    for i in range(n-1,n+2):
+                    for i in range(n-1,n+2): # Checks around cell in quastion
                         for j in range(m-1,m+2):
                         
-                            if clid[i,j]>0:
+                            if clid[i,j]>0: # Will append all non-zero positive values surrounding the cell in question
                                 check = np.append(check, np.array([[clid[i,j]]]), axis = 1)
-                    #print(check)
-                    if check.shape[1] == 0:
-                        minimum = inc
-                        inc = inc + 1
+                    if check.shape[1] == 0: # If checking matrix is empty, then that means that all the surrounding, valid cells are all zero
+                        minimum = inc # in this case, the value here will be given as inc
+                        inc = inc + 1 # inc increases
                         clid[n,m] = minimum
                         cont = True
                         
@@ -127,8 +129,10 @@ def ClusterStart(clid, clim):
                     centers[int(clid[n,m])-1,3] = centers[int(clid[n,m])-1,3] + 1
     
     C = np.zeros((0,4))
+    
+    size_limit = 5 # Threshold for cluster size 
     for n in range(centers.shape[0]):
-        if centers[n,3] !=0:
+        if centers[n,3] > size_limit: 
             C = np.append(C,np.array([centers[n,:]]), axis = 0)
             
     for n in range(C.shape[0]):
@@ -144,7 +148,6 @@ def Ratios(centers): #Creates the ratios matrix
         for m in range(centers.shape[0]):
             if n!=m:
                 distances[n,m] = math.sqrt((centers[n,0]-centers[m,0])**2+(centers[n,1]-centers[m,1])**2) 
-            
     for n in range(centers.shape[0]):
         for m in range(centers.shape[0]):
             for p in range(centers.shape[0]):
@@ -153,7 +156,7 @@ def Ratios(centers): #Creates the ratios matrix
     return ratios
 
 def ReadDir(): # Finds the .csv files 
-    dirs = np.asarray(os.listdir( os.getcwd() ))
+    dirs = np.asarray(os.listdir(os.getcwd()))
     files = np.zeros((0,2))
     for n in range(dirs.shape[0]):
         if ".csv" in dirs[n]:
