@@ -8,19 +8,39 @@ Created on Sun Jun 16 21:14:47 2019
 import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
+import os
+import csv
+import math
+import sys
+import time
 
 def FindStars(name):
-    npim = ProcessImage(name)
-    clid, clim = FrameMaker(npim)
+    clid, clim = FrameMaker(ProcessImage(name))
     clid, centers = ClusterStart(clid, clim)
     for n in range(centers.shape[0]):
         for m in range(centers.shape[1]-1):
             centers[n][m] = centers[n][m]/centers[n][3] -1
             
+            
+    distances = np.zeros((centers.shape[0],centers.shape[0]))
+    ratios = np.zeros((centers.shape[0],centers.shape[0],centers.shape[0]))
+    for n in range(centers.shape[0]):
+        for m in range(centers.shape[0]):
+            if n!=m:
+                distances[n,m] = math.sqrt((centers[n,0]-centers[m,0])**2+(centers[n,1]-centers[m,1])**2) 
+            
+    for n in range(centers.shape[0]):
+        for m in range(centers.shape[0]):
+            for p in range(centers.shape[0]):
+                if n!=m and n!=p and m!=p:
+                    ratios[n,m,p] = distances[n,m]/distances[m,p]
+                    
+    constellations = ReadDir()
+            
     
     
     
-    return npim, clid, clim, centers 
+    return clid, clim, centers, constellations, distances, ratios 
 
 
 
@@ -115,9 +135,7 @@ def ClusterStart(clid, clim):
                         if minimum < clid[n,m] or clid[n,m]==0:
                             clid[n,m] = minimum
                             cont = True
-                    #print(minimum)
-                        
-     
+
 
     centers = np.zeros((inc,4))
     for n in range(1,clid.shape[0]-2):
@@ -134,3 +152,18 @@ def ClusterStart(clid, clim):
             C = np.append(C,np.array([centers[n,:]]), axis = 0)
                 
     return clid, C
+
+
+
+def ReadDir(): # Finds the .csv files 
+    dirs = np.asarray(os.listdir( os.getcwd() ))
+    files = np.zeros((0,2))
+    for n in range(dirs.shape[0]):
+        if ".csv" in dirs[n]:
+            print(dirs[n])
+            files = np.append(files, np.array([[dirs[n],0]]),axis = 0)
+    return files
+    
+    
+    
+    
