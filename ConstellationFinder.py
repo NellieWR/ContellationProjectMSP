@@ -1,7 +1,8 @@
+
+    
 # -*- coding: utf-8 -*-
 """
 Created on Sun Jun 16 21:14:47 2019
-
 @author: Constellation Group
 """
 
@@ -21,9 +22,11 @@ def FindStars(name):
     clid, centers = ClusterStart(clid, clim)
     print(centers.shape[0])
     print("Ratios")
-    ratios = Ratios(centers)     
+    ratios, distances = Ratios(centers)     
     print("ReadDir")              
     constellations = ReadDir()
+    
+    constellations = FindConf(constellations,ratios, distances)
 
     return clid, clim, centers, constellations, ratios 
 
@@ -130,7 +133,7 @@ def ClusterStart(clid, clim):
     
     C = np.zeros((0,4))
     
-    size_limit = 5 # Threshold for cluster size 
+    size_limit = 0 # Threshold for cluster size 
     for n in range(centers.shape[0]):
         if centers[n,3] > size_limit: 
             C = np.append(C,np.array([centers[n,:]]), axis = 0)
@@ -153,7 +156,7 @@ def Ratios(centers): #Creates the ratios matrix
             for p in range(centers.shape[0]):
                 if n!=m and n!=p and m!=p:
                     ratios[n,m,p] = distances[n,m]/distances[m,p]
-    return ratios
+    return ratios, distances
 
 def ReadDir(): # Finds the .csv files 
     dirs = np.asarray(os.listdir(os.getcwd()))
@@ -162,7 +165,31 @@ def ReadDir(): # Finds the .csv files
         if ".csv" in dirs[n]:
             files = np.append(files, np.array([[dirs[n],0]]),axis = 0)
     return files
+
+def FindConf(constellations,ratios,distances):
+    
+    for file in range(constellations.shape[0]): # Begins to check all the .csv files
+        with open(constellations[file,0], newline='') as csvfile: #https://stackoverflow.com/questions/46614526/how-to-import-a-csv-file-into-a-data-array
+            data = list(csv.reader(csvfile))
+        data = np.asarray(data) # converts the list into a numpy array
+     
+        dataratios = np.zeros((data.shape[0],data.shape[0],data.shape[0])) #Prapares a ratios matrix for the database       
+        for n in range(1,data.shape[0]):
+            for m in range(1,data.shape[0]):
+                for p in range(1,data.shape[0]):
+                    if n!=m and n!=p and m!=p:
+                        dataratios[n,m,p] = int(data[n,m])/int(data[m,p])
+        
+        
+        
+                    
+        
+        
+        
+    
+    return constellations
     
     
     
     
+
