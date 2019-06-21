@@ -25,6 +25,8 @@ def FindStars(name):
     ratios, distances = Ratios(centers)     
     print("ReadDir")              
     constellations = ReadDir()
+    
+    constellations = FindConf(constellations,ratios, distances)
 
     constellations = FindConf(constellations,ratios, distances)
 
@@ -157,14 +159,6 @@ def Ratios(centers): #Creates the ratios matrix
                 if n!=m and n!=p and m!=p:
                     ratios[n,m,p] = distances[n,m]/distances[m,p]
     return ratios, distances
-
-def RatiosFromDistances(distances):
-    ratios = np.zeros((distances.shape[0],distances.shape[0],distances.shape[0]))
-    for n in range(distances.shape[0]):
-        for m in range(distances.shape[0]):
-            for p in range(distances.shape[0]):
-                if n!=m and n!=p and m!=p:
-                    ratios[n,m,p] = distances[n,m]/distances[m,p]
 
 def ReadDir(): # Finds the .csv files 
     dirs = np.asarray(os.listdir(os.getcwd()))
