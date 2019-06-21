@@ -24,6 +24,7 @@ def FindStars(name):
     ratios = Ratios(centers)     
     print("ReadDir")              
     constellations = ReadDir()
+    #np.savetxt('ratios.csv', ratios, delimiter = ',')
 
     return clid, clim, centers, constellations, ratios 
 
@@ -155,6 +156,14 @@ def Ratios(centers): #Creates the ratios matrix
                     ratios[n,m,p] = distances[n,m]/distances[m,p]
     return ratios
 
+def RatiosFromDistances(distances):
+    ratios = np.zeros((distances.shape[0],distances.shape[0],distances.shape[0]))
+    for n in range(distances.shape[0]):
+        for m in range(distances.shape[0]):
+            for p in range(distances.shape[0]):
+                if n!=m and n!=p and m!=p:
+                    ratios[n,m,p] = distances[n,m]/distances[m,p]
+
 def ReadDir(): # Finds the .csv files 
     dirs = np.asarray(os.listdir(os.getcwd()))
     files = np.zeros((0,2))
@@ -162,7 +171,7 @@ def ReadDir(): # Finds the .csv files
         if ".csv" in dirs[n]:
             files = np.append(files, np.array([[dirs[n],0]]),axis = 0)
     return files
-    
+
     
     
     
