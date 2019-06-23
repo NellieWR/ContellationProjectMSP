@@ -12,8 +12,6 @@ import matplotlib.pyplot as plt
 import os
 import csv
 import math
-import sys
-import time
 
 def FindStars(name):
     npim = ProcessImage(name)
@@ -245,8 +243,12 @@ def FindConf(constellations,ratios,distances, centers, name, angles):
         
     return constellations
 
-def CompareRatios(): # imratios = image ratios, dbratios = database ratios
-    print('stuff))
+class ConstellationFinder(imratios, dbratios):
+    def __init__(self, imratios, dbratios):
+        self.imratios = imratios
+        self.dbratios = dbratios
+    
+    
     
 
     
