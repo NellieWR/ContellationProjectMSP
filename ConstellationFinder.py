@@ -13,15 +13,18 @@ import os
 import csv
 import math
 
+
 def FindStars(name):
+    print("ProcessImage")
     npim = ProcessImage(name)
+    
     print("FrameMaker")
     clid, clim = FrameMaker(npim)
     
     print("ClusterStart")
     clid, centers = ClusterStart(clid, clim, npim)
     
-    print(centers.shape[0])
+    print("Stars found: ", centers.shape[0])
     
     print("Ratios")
     ratios, distances, angles = Ratios(centers)   
@@ -29,6 +32,7 @@ def FindStars(name):
     print("ReadDir")              
     constellations = ReadDir()
     
+    print("FindConf")
     constellations = FindConf(constellations,ratios, distances, centers, name, angles)
 
     constellations = FindConf(constellations,ratios, distances)
@@ -148,6 +152,20 @@ def ClusterStart(clid, clim, npim):
         for m in range(C.shape[1]-2):
             C[n][m] = C[n][m]/C[n][3] -1
             
+    
+    # The following sorts by total brightness
+    cont = True
+    while cont:
+        cont = False
+        for n in range(C.shape[0]-1):
+            if C[n,2]*C[n,3] < C[n+1,2]*C[n+1,3]:
+                cont = True
+                replace = np.array(([C[n+1,:],C[n,:]]))
+                C[n,:] = replace[0,:]
+                C[n+1,:] = replace[1,:]
+    
+    
+            
     plt.imshow(npim)
     
     for n in range(C.shape[0]):
@@ -192,54 +210,10 @@ def FindConf(constellations,ratios,distances, centers, name, angles):
         data = np.asarray(data) # converts the list into a numpy array
         data = data[1:data.shape[0]-1,1:data.shape[1]-1] # Reshapes to exclude names
         data = data.astype(np.float) # Converts to float array
-         
-        locationratios = np.zeros((2,3))
-        minimumratios = -1 
-        locationangles = np.zeros((2,3))
-        minimumangles = -1 
-        
-        for n in range(data.shape[0]):
-            for m in range(data.shape[0]):
-                for p in range(data.shape[0]):
-                    if n!=m and n!=p and m!=p and data[n,m]!=0 and data[m,p]!=0:
-                        if (np.abs(ratios - data[n,m]/data[m,p])).min() <minimumratios or minimumratios == -1:
-                            minimumratios = (np.abs(ratios - data[n,m]/data[m,p])).min()
-                            
-                            minlocation = (np.abs(ratios - data[n,m]/data[m,p])).argmin()
- 
-                            minz = np.floor(minlocation/ratios.shape[0]**2)
-                            miny = np.floor(((minlocation-(minz*ratios.shape[0]**2))/ratios.shape[0]))
-                            minx = minlocation - minz*ratios.shape[0]**2 - ratios.shape[0]*miny
-                            locationratios = np.array(([[n,m,p],[minz,miny,minx]]))
-                            
-                        
-                        if (np.abs(angles - np.arccos((data[n,m]**2+data[m,p]**2-data[n,p]**2)/(2*data[n,m]*data[m,p])))).min() <minimumangles or minimumangles == -1:
-                            minimumangles = (np.abs(angles - np.arccos((data[n,m]**2+data[m,p]**2-data[n,p]**2)/(2*data[n,m]*data[m,p])))).min()
-                            
-                            minlocation = (np.abs(angles - np.arccos((data[n,m]**2+data[m,p]**2-data[n,p]**2)/(2*data[n,m]*data[m,p])))).argmin()
- 
-                            minz = np.floor(minlocation/angles.shape[0]**2)
-                            miny = np.floor(((minlocation-(minz*angles.shape[0]**2))/angles.shape[0]))
-                            minx = minlocation - minz*angles.shape[0]**2 - angles.shape[0]*miny
-                            locationangles = np.array(([[n,m,p],[minz,miny,minx]]))                        
-                        
-           
-                        
-                        
-                        
         
         
-        print(minimumratios)
-        print(locationratios)
-        print(float(data[int(locationratios[0,0]),int(locationratios[0,1])])/float(distances[int(locationratios[1,0]),int(locationratios[1,1])])-float(data[int(locationratios[0,1]),int(locationratios[0,2])])/float(distances[int(locationratios[1,1]),int(locationratios[1,2])]))
-        print(minimumangles)
-        print(locationangles)
-        im = plt.imread(name)
-        implot = plt.imshow(im)
-        plt.scatter(x=[centers[int(locationratios[1,0]),1],centers[int(locationratios[1,1]),1],centers[int(locationratios[1,2]),1]], y=[centers[int(locationratios[1,0]),0],centers[int(locationratios[1,1]),0],centers[int(locationratios[1,2]),0]], c='r', s=40)
-        plt.scatter(x=[centers[int(locationangles[1,0]),1],centers[int(locationangles[1,1]),1],centers[int(locationangles[1,2]),1]], y=[centers[int(locationangles[1,0]),0],centers[int(locationangles[1,1]),0],centers[int(locationangles[1,2]),0]], c='b', s=20)
-        plt.show()
         
+
         
     return constellations
 
