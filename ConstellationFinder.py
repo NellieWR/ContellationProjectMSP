@@ -135,7 +135,7 @@ def ClusterStart(clid, clim, npim):
                 if clid[n,m] > 0:
                     centers[int(clid[n,m])-1,0] = centers[int(clid[n,m])-1,0] + n
                     centers[int(clid[n,m])-1,1] = centers[int(clid[n,m])-1,1] + m
-                    centers[int(clid[n,m])-1,2] = centers[int(clid[n,m])-1,2] + int(clid[n,m])
+                    centers[int(clid[n,m])-1,2] = centers[int(clid[n,m])-1,2] + int(clim[n,m])
                     centers[int(clid[n,m])-1,3] = centers[int(clid[n,m])-1,3] + 1
     
     C = np.zeros((0,4))
