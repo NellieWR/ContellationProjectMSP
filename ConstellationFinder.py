@@ -169,7 +169,7 @@ def Ratios(centers): #Creates the ratios matrix
             for p in range(centers.shape[0]):
                 if n!=m and n!=p and m!=p:
                     ratios[n,m,p] = distances[n,m]/distances[m,p]
-                    angles[n,m,p] = np.arccos((distances[n,m]**2+distances[m,p]**2-distances[m,p]**2)/(2*distances[n,m]*distances[m,p]))
+                    angles[n,m,p] = np.arccos((distances[n,m]**2+distances[m,p]**2-distances[n,p]**2)/(2*distances[n,m]*distances[m,p]))
                     
                     
     
