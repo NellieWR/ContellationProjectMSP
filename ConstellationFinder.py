@@ -244,6 +244,9 @@ def FindConf(constellations,ratios,distances, centers, name, angles):
         
         
     return constellations
+
+def CompareRatios(): # imratios = image ratios, dbratios = database ratios
+    print('stuff))
     
 
     
