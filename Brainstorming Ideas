@@ -1,1 +1,11 @@
-Find the shape of constellations using a fixed point from the farmost left star and find euclidian distances
+# Find the shape of constellations using a fixed point from the farmost left star and find euclidian distances
+# Distances from other stars to the right of the fixed star (on the left) would be calculated. 
+# When this constellation is rotated, the left-most fixed point would not be the bottom most.
+# However, distances remain the same wrt the fixed point.
+
+
+
+
+
+# Cos rule for triangles
+# c^2 = a^2 + b^2 - 2ab cos (angle)
