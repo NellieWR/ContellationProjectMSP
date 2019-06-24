@@ -9,3 +9,4 @@
 
 # Cos rule for triangles
 # c^2 = a^2 + b^2 - 2ab cos (angle)
+# Thought of as an alternative to using euclidian distances
