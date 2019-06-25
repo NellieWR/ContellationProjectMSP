@@ -34,7 +34,7 @@ def FindStars(name):
     print("ReadDir")              
     constellations = ReadDir()
 
-    return clid, clim, centers, constellations, ratios, angles
+    return npim, clid, clim, centers, constellations, ratios, angles
 
 
 
@@ -222,12 +222,13 @@ def ReadDir(): # Finds the .csv files
     return files
 
 class ConstellationFinder:
-    def __init__(self, imratios, dbratios, imangles, dbangles, centers):
+    def __init__(self, imratios, dbratios, imangles, dbangles, centers, npim):
         self.imratios = imratios
         self.dbratios = dbratios
         self.centers = centers
         self.imangles = imangles
         self.dbangles = dbangles
+        self.npim = npim
     
     def CompareRatios(self):
         length = self.centers.shape[0]
@@ -236,6 +237,9 @@ class ConstellationFinder:
         for n in range(length):
             brightness[n] = self.centers[n][2]*self.centers[n][3] # Finds the total brightness for each star.
         brightest = np.argmax(brightness, axis = 0) # Finds the ID of thebrightest star.
+        
+        plt.imshow(self.npim)
+        plt.scatter(x=[self.centers[brightest,1]],y=[self.centers[brightest,0]],c = 'r', s = 10)
         for nim in range(self.imratios.shape[0]): # For stars branching off from m in some direction.
             for pim in range(self.imratios.shape[0]): # For stars brannhing off from m in some direction.
                 if nim != pim:
@@ -243,11 +247,18 @@ class ConstellationFinder:
                         for mdb in range(self.dbratios.shape[0]):
                             for pdb in range(self.dbratios.shape[0]):
                                 if ndb != mdb and ndb != pdb and mdb != pdb:
-                                    if self.imratios[nim, brightest, pim] >= 0.9999*self.dbratios[ndb, mdb, pdb] and self.imratios[nim, brightest, pim] <= 1.0001*self.dbratios[ndb, mdb, pdb]:
+                                    upperratio = self.imratios[nim, brightest, pim] <= 1.01*self.dbratios[ndb, mdb, pdb]
+                                    lowerratio = self.imratios[nim, brightest, pim] >= 0.99*self.dbratios[ndb, mdb, pdb]
+                                    upperangle = self.imangles[nim, brightest, pim] <= 1.01*self.dbangles[ndb, mdb, pdb]
+                                    lowerangle = self.imangles[nim, brightest, pim] >= 0.99*self.dbangles[ndb, mdb, pdb]
+                                    if lowerratio and upperratio and lowerangle and upperangle:
                                         print(self.imratios[nim, brightest, pim])
                                         print(self.dbratios[ndb, mdb, pdb])
                                         count = count +1
+                                        plt.scatter(x=[self.centers[nim,1],self.centers[pim,1]],y=[self.centers[nim,0],self.centers[pim,0]],c = 'r', s = 10)
+                                        
         print(count)
+        plt.show()
         
         
         
