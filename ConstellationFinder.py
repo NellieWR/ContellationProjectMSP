@@ -142,7 +142,7 @@ def ClusterStart(clid, clim, npim):
     
     C = np.zeros((0,4))
     
-    size_limit =5 # Threshold for cluster size 
+    size_limit = 10 # Threshold for cluster size 
     for n in range(centers.shape[0]):
         if centers[n,3] > size_limit: 
             C = np.append(C,np.array([centers[n,:]]), axis = 0)
@@ -185,7 +185,7 @@ def Ratios(centers): #Creates the ratios matrix
     for n in range(centers.shape[0]):
         for m in range(centers.shape[0]):
             for p in range(centers.shape[0]):
-                if n!=m and n!=p and m!=p:
+                if n!=m and n!=p and m!=p and distances[n,m]!=0 and distances[m,p]!=0 and distances[n,p]!=0:
                     ratios[n,m,p] = distances[n,m]/distances[m,p]
                     angles[n,m,p] = np.arccos((distances[n,m]**2+distances[m,p]**2-distances[n,p]**2)/(2*distances[n,m]*distances[m,p]))
                     
@@ -217,13 +217,55 @@ def FindConf(constellations,ratios,distances, centers, name, angles):
         with open(constellations[file,0], newline='') as csvfile: #https://stackoverflow.com/questions/46614526/how-to-import-a-csv-file-into-a-data-array
             data = list(csv.reader(csvfile))
         data = np.asarray(data) # converts the list into a numpy array
-        data = data[1:data.shape[0]-1,1:data.shape[1]-1] # Reshapes to exclude names
+        data = data[1:data.shape[0],1:data.shape[1]] # Reshapes to exclude names
+        print(data)
         data = data.astype(np.float) # Converts to float array
+        dataratios = np.zeros((0,1))
+        dataangles = np.zeros((0,1))
+        
+        for z in range(data.shape[0]):
+            for y in range(data.shape[0]):
+                for x in range(data.shape[0]):
+                    if z!=y and y!=x and z!=x and data[z,y]!=0 and data[y,x]!=0 and data[z,x]!=0:
+                        
+                        dataratios = np.append(dataratios, np.array([[data[z,y]/data[y,x]]]), axis = 0)
+
+                        dataangles = np.append(dataangles, np.array([[math.acos((data[z,y]**2+data[y,x]**2-data[z,x]**2)/(2*data[z,y]*data[y,x]))]]), axis = 0)
         
         
         
+        valid_stars = np.zeros((0,1))
+        
+        for r in range(dataratios.shape[0]):
+            
+            #minlocation_rat = (np.abs(ratios - dataratios[r])).argmin()
+            minlocation_ang = (np.abs(angles - dataangles[r])).argmin() 
+            loc = np.zeros((0,1))
+            
+            #z1 = np.floor(minlocation_rat/ratios.shape[0]**2)
+            #y1 = np.floor(((minlocation_rat-(z1*ratios.shape[0]**2))/ratios.shape[0]))
+            #x1 = minlocation_rat - z1*ratios.shape[0]**2 - ratios.shape[0]*y1
+            
+            z2 = np.floor(minlocation_ang/ratios.shape[0]**2)
+            y2 = np.floor(((minlocation_ang-(z2*ratios.shape[0]**2))/ratios.shape[0]))
+            x2 = minlocation_ang - z2*ratios.shape[0]**2 - ratios.shape[0]*y2
+
+
+            #loc = np.append(loc,np.array([[z1]]),axis = 0)
+            #loc = np.append(loc,np.array([[y1]]),axis = 0)
+            #loc = np.append(loc,np.array([[x1]]),axis = 0)
+            loc = np.append(loc,np.array([[z2]]),axis = 0)
+            loc = np.append(loc,np.array([[y2]]), axis = 0)
+            loc = np.append(loc,np.array([[x2]]), axis = 0)
+            
+            for n in range(loc.shape[0]):
+                if loc[n,0] not in valid_stars:
+                    valid_stars = np.append(valid_stars, np.array([[loc[n,0]]]), axis = 0)
+            
 
         
+        print("Necesary stars: ",data.shape[0],"  Found stars: ",valid_stars.shape[0])
+        print(valid_stars)
     return constellations
 
 class ConstellationFinder:
@@ -259,5 +301,4 @@ class ConstellationFinder:
     
     
 
-    
 
