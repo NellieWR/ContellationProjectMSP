@@ -193,6 +193,15 @@ def Ratios(centers): #Creates the ratios matrix
     
     return ratios, distances, angles
 
+def RatiosFromDistances(distances):
+    ratios = np.zeros((distances.shape[0],distances.shape[0],distances.shape[0])) # Creates an empty array to gold the ratios.
+    for n in range(distances.shape[0]):
+        for m in range(distances.shape[0]):
+            for p in range(distances.shape[0]):
+                if n!=m and n!=p and m!=p:
+                    ratios[n,m,p] = distances[n,m]/distances[m,p]
+    return ratios
+
 def ReadDir(): # Finds the .csv files 
     dirs = np.asarray(os.listdir(os.getcwd()))
     files = np.zeros((0,2))
@@ -217,11 +226,36 @@ def FindConf(constellations,ratios,distances, centers, name, angles):
         
     return constellations
 
-class ConstellationFinder(imratios, dbratios):
-    def __init__(self, imratios, dbratios):
+class ConstellationFinder:
+    def __init__(self, imratios, dbratios, imangles, dbangles, centers):
         self.imratios = imratios
         self.dbratios = dbratios
+        self.centers = centers
+        self.imangles = imangles
+        self.dbangles = dbangles
     
+    def CompareRatios(self):
+        length = self.centers.shape[0]
+        brightness = np.zeros((length, 1))
+        count = 0
+        for n in range(length):
+            brightness[n] = self.centers[n][2]*self.centers[n][3] # Finds the total brightness for each star.
+        brightest = np.argmax(brightness, axis = 0) # Finds the ID of thebrightest star.
+        for nim in range(self.imratios.shape[0]): # For stars branching off from m in some direction.
+            for pim in range(self.imratios.shape[0]): # For stars brannhing off from m in some direction.
+                if nim != pim:
+                    for ndb in range(self.dbratios.shape[0]):
+                        for mdb in range(self.dbratios.shape[0]):
+                            for pdb in range(self.dbratios.shape[0]):
+                                if ndb != mdb and ndb != pdb and mdb != pdb:
+                                    if self.imratios[nim, brightest, pim] >= 0.9999*self.dbratios[ndb, mdb, pdb] and self.imratios[nim, brightest, pim] <= 1.0001*self.dbratios[ndb, mdb, pdb]:
+                                        print(self.imratios[nim, brightest, pim])
+                                        print(self.dbratios[ndb, mdb, pdb])
+                                        count = count +1
+        print(count)
+        
+        
+        
     
     
 
