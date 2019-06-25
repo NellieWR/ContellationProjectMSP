@@ -26,8 +26,10 @@ def FindStars(name):
     
     print("Stars found: ", centers.shape[0])
     
-    print("Ratios")
-    ratios, distances, angles = Ratios(centers)   
+    distances = Distances(centers)
+    ratios = Ratios(distances) 
+    angles = Angles(distances)
+    
     
     print("ReadDir")              
     constellations = ReadDir()
@@ -174,24 +176,38 @@ def ClusterStart(clid, clim, npim):
             
     return clid, C
 
-def Ratios(centers): #Creates the ratios matrix
+def Distances(centers): #Creates a distances matrix
     distances = np.zeros((centers.shape[0],centers.shape[0]))
-    ratios = np.zeros((centers.shape[0],centers.shape[0],centers.shape[0]))
-    angles = np.zeros((centers.shape[0],centers.shape[0],centers.shape[0]))
     for n in range(centers.shape[0]):
         for m in range(centers.shape[0]):
             if n!=m:
-                distances[n,m] = math.sqrt((centers[n,0]-centers[m,0])**2+(centers[n,1]-centers[m,1])**2) 
-    for n in range(centers.shape[0]):
-        for m in range(centers.shape[0]):
-            for p in range(centers.shape[0]):
+                distances[n,m] = math.sqrt((centers[n,0]-centers[m,0])**2+(centers[n,1]-centers[m,1])**2)    
+    return distances
+
+
+def Ratios(distances): #Creates the ratios matrix
+    ratios = np.zeros((distances.shape[0],distances.shape[0],distances.shape[0]))
+ 
+    for n in range(distances.shape[0]):
+        for m in range(distances.shape[0]):
+            for p in range(distances.shape[0]):
                 if n!=m and n!=p and m!=p and distances[n,m]!=0 and distances[m,p]!=0 and distances[n,p]!=0:
                     ratios[n,m,p] = distances[n,m]/distances[m,p]
+    
+    return ratios
+
+def Angles(distances): #Creates an angles matrix
+    angles = np.zeros((distances.shape[0],distances.shape[0],distances.shape[0]))
+    for n in range(distances.shape[0]):
+        for m in range(distances.shape[0]):
+            for p in range(distances.shape[0]):
+                if n!=m and n!=p and m!=p and distances[n,m]!=0 and distances[m,p]!=0 and distances[n,p]!=0:
                     angles[n,m,p] = np.arccos((distances[n,m]**2+distances[m,p]**2-distances[n,p]**2)/(2*distances[n,m]*distances[m,p]))
                     
-                    
+    return angles
+
     
-    return ratios, distances, angles
+    
 
 def RatiosFromDistances(distances):
     ratios = np.zeros((distances.shape[0],distances.shape[0],distances.shape[0])) # Creates an empty array to gold the ratios.
