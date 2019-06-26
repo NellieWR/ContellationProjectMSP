@@ -36,7 +36,14 @@ def FindStars(name):
 
     return npim, clid, clim, centers, constellations, ratios, angles
 
-
+def OpenDatabase(filename):
+    distances = np.genfromtxt(filename, delimiter = ',')
+    distances = np.delete(distances, 0, 0)
+    distances = np.delete(distances, 0, 1)
+    ratios = Ratios(distances)
+    angles = Angles(distances)
+    
+    return distances, ratios, angles
 
 def ProcessImage(imagename):
     im = Image.open(imagename).convert("L") # Opens a .jpg file containing some picture of the night sky and converts it to grayscale.
@@ -252,8 +259,8 @@ class ConstellationFinder:
                                     upperangle = self.imangles[nim, brightest, pim] <= 1.01*self.dbangles[ndb, mdb, pdb] # Bool to check for angle agreement to some upper bound.
                                     lowerangle = self.imangles[nim, brightest, pim] >= 0.99*self.dbangles[ndb, mdb, pdb] # Bool to check for angle agreement to some lower bound.
                                     if lowerratio and upperratio and lowerangle and upperangle: # Checks if all the bools are true.
-                                        print(self.imratios[nim, brightest, pim])
-                                        print(self.dbratios[ndb, mdb, pdb])
+                                        #print(self.imratios[nim, brightest, pim])
+                                        #print(self.dbratios[ndb, mdb, pdb])
                                         count = count +1 # Add one to the matching ratio counter.
                                         plt.scatter(x=[self.centers[nim,1],self.centers[pim,1]],y=[self.centers[nim,0],self.centers[pim,0]],c = 'r', s = 10) # Adds the stars that make the ratio to the scatter plot.
                                         
