@@ -222,7 +222,7 @@ def ReadDir(): # Finds the .csv files
     return files
 
 class ConstellationFinder:
-    def __init__(self, imratios, dbratios, imangles, dbangles, centers, npim):
+    def __init__(self, imratios, dbratios, imangles, dbangles, centers, npim): # Automatically called when an instance of this object is created.
         self.imratios = imratios
         self.dbratios = dbratios
         self.centers = centers
@@ -231,34 +231,34 @@ class ConstellationFinder:
         self.npim = npim
     
     def CompareRatios(self):
-        length = self.centers.shape[0]
-        brightness = np.zeros((length, 1))
-        count = 0
-        for n in range(length):
+        length = self.centers.shape[0] # Takes the amount of stars identified in the image.
+        brightness = np.zeros((length, 1)) # Initialises a matrix that will be used to calculate brightness for each star.
+        count = 0 # Initialises a counter for how many ratio matches have been found.
+        for n in range(length): # Loop te calculate brightness.
             brightness[n] = self.centers[n][2]*self.centers[n][3] # Finds the total brightness for each star.
         brightest = np.argmax(brightness, axis = 0) # Finds the ID of thebrightest star.
         
-        plt.imshow(self.npim)
-        plt.scatter(x=[self.centers[brightest,1]],y=[self.centers[brightest,0]],c = 'r', s = 10)
-        for nim in range(self.imratios.shape[0]): # For stars branching off from m in some direction.
-            for pim in range(self.imratios.shape[0]): # For stars brannhing off from m in some direction.
-                if nim != pim:
-                    for ndb in range(self.dbratios.shape[0]):
-                        for mdb in range(self.dbratios.shape[0]):
-                            for pdb in range(self.dbratios.shape[0]):
-                                if ndb != mdb and ndb != pdb and mdb != pdb:
-                                    upperratio = self.imratios[nim, brightest, pim] <= 1.01*self.dbratios[ndb, mdb, pdb]
-                                    lowerratio = self.imratios[nim, brightest, pim] >= 0.99*self.dbratios[ndb, mdb, pdb]
-                                    upperangle = self.imangles[nim, brightest, pim] <= 1.01*self.dbangles[ndb, mdb, pdb]
-                                    lowerangle = self.imangles[nim, brightest, pim] >= 0.99*self.dbangles[ndb, mdb, pdb]
-                                    if lowerratio and upperratio and lowerangle and upperangle:
+        plt.imshow(self.npim) # Initialises a plot with the processed constellation image in there.
+        plt.scatter(x=[self.centers[brightest,1]],y=[self.centers[brightest,0]],c = 'r', s = 10) # Adds the brightest star as a scatter point.
+        for nim in range(self.imratios.shape[0]): # For stars branching off from the brightest in some direction in the image.
+            for pim in range(self.imratios.shape[0]): # For stars branching off from the brightest in some direction in the image.
+                if nim != pim: # Duplicate index numbers along different axes should not be checked.
+                    for ndb in range(self.dbratios.shape[0]): # For stars branching off from some m in some direction in the database.
+                        for mdb in range(self.dbratios.shape[0]): # For stars branching off from some m in some direction in the database.
+                            for pdb in range(self.dbratios.shape[0]): # For stars branching off from some m in some direction in the database.
+                                if ndb != mdb and ndb != pdb and mdb != pdb: # Duplicate index numbers along different axes shouldn not be checked.
+                                    upperratio = self.imratios[nim, brightest, pim] <= 1.01*self.dbratios[ndb, mdb, pdb] # Bool to check for ratio agreement to some upper bound.
+                                    lowerratio = self.imratios[nim, brightest, pim] >= 0.99*self.dbratios[ndb, mdb, pdb] # Bool to check for ratio agreement to some lower bound.
+                                    upperangle = self.imangles[nim, brightest, pim] <= 1.01*self.dbangles[ndb, mdb, pdb] # Bool to check for angle agreement to some upper bound.
+                                    lowerangle = self.imangles[nim, brightest, pim] >= 0.99*self.dbangles[ndb, mdb, pdb] # Bool to check for angle agreement to some lower bound.
+                                    if lowerratio and upperratio and lowerangle and upperangle: # Checks if all the bools are true.
                                         print(self.imratios[nim, brightest, pim])
                                         print(self.dbratios[ndb, mdb, pdb])
-                                        count = count +1
-                                        plt.scatter(x=[self.centers[nim,1],self.centers[pim,1]],y=[self.centers[nim,0],self.centers[pim,0]],c = 'r', s = 10)
+                                        count = count +1 # Add one to the matching ratio counter.
+                                        plt.scatter(x=[self.centers[nim,1],self.centers[pim,1]],y=[self.centers[nim,0],self.centers[pim,0]],c = 'r', s = 10) # Adds the stars that make the ratio to the scatter plot.
                                         
         print(count)
-        plt.show()
+        plt.show() # Shows the image.
         
         
         
