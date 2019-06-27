@@ -245,14 +245,15 @@ class ConstellationFinder:
             brightness[n] = self.centers[n][2]*self.centers[n][3] # Finds the total brightness for each star.
         brightest = np.argmax(brightness, axis = 0) # Finds the ID of thebrightest star.
         
+        stars = np.zeros((length, 1)) # Array that will store which stars are identified as potiential constellation stars, and how often each is identified.
         plt.imshow(self.npim) # Initialises a plot with the processed constellation image in there.
         plt.scatter(x=[self.centers[brightest,1]],y=[self.centers[brightest,0]],c = 'r', s = 10) # Adds the brightest star as a scatter point.
         for nim in range(self.imratios.shape[0]): # For stars branching off from the brightest in some direction in the image.
             for pim in range(self.imratios.shape[0]): # For stars branching off from the brightest in some direction in the image.
                 if nim != pim: # Duplicate index numbers along different axes should not be checked.
-                    for ndb in range(self.dbratios.shape[0]): # For stars branching off from some m in some direction in the database.
-                        for mdb in range(self.dbratios.shape[0]): # For stars branching off from some m in some direction in the database.
-                            for pdb in range(self.dbratios.shape[0]): # For stars branching off from some m in some direction in the database.
+                    for ndb in range(self.dbratios.shape[0]): # For stars branching off from some mdb in some direction in the database.
+                        for mdb in range(self.dbratios.shape[0]): # mdb that stars are branching off of for the ratios.
+                            for pdb in range(self.dbratios.shape[0]): # For stars branching off from some mdb in some direction in the database.
                                 if ndb != mdb and ndb != pdb and mdb != pdb: # Duplicate index numbers along different axes shouldn not be checked.
                                     upperratio = self.imratios[nim, brightest, pim] <= 1.01*self.dbratios[ndb, mdb, pdb] # Bool to check for ratio agreement to some upper bound.
                                     lowerratio = self.imratios[nim, brightest, pim] >= 0.99*self.dbratios[ndb, mdb, pdb] # Bool to check for ratio agreement to some lower bound.
@@ -263,8 +264,30 @@ class ConstellationFinder:
                                         #print(self.dbratios[ndb, mdb, pdb])
                                         count = count +1 # Add one to the matching ratio counter.
                                         plt.scatter(x=[self.centers[nim,1],self.centers[pim,1]],y=[self.centers[nim,0],self.centers[pim,0]],c = 'r', s = 10) # Adds the stars that make the ratio to the scatter plot.
-                                        
+                                        stars[nim, 0] = stars[nim, 0]+1
+                                        stars[pim, 0] = stars[pim, 0]+1
         print(count)
+        print(stars)
+        stars = stars.astype(int) # Changes the data type of stars to integers.
+        
+        matches = np.zeros((length, 1)) # Will count the amount of matches for each star.
+        for m in range(length): # Picks a star in imratios/imangles to compare ratios or angles from.
+            if stars[m] != 0: # Checks if a star is even considered part of a constellation.
+                for nim in range(self.imratios.shape[0]): # For stars branching off from m in some direction in the image.
+                    for pim in range(self.imratios.shape[0]): # For stars branching off from m in some direction in the image.
+                        if nim != pim: # Duplicate index numbers along different axes should not be checked.
+                            for ndb in range(self.dbratios.shape[0]): # For stars branching off from some mdb in some direction in the database.
+                                for mdb in range(self.dbratios.shape[0]): # mdb that stars are branching off of for the ratios.
+                                    for pdb in range(self.dbratios.shape[0]): # For stars branching off from some mdb in some direction in the database.
+                                        if ndb != mdb and ndb != pdb and mdb != pdb: # Duplicate index numbers along different axes shouldn not be checked.
+                                            upperratio = self.imratios[nim, m, pim] <= 1.01*self.dbratios[ndb, mdb, pdb] # Bool to check for ratio agreement to some upper bound.
+                                            lowerratio = self.imratios[nim, m, pim] >= 0.99*self.dbratios[ndb, mdb, pdb] # Bool to check for ratio agreement to some lower bound.
+                                            upperangle = self.imangles[nim, m, pim] <= 1.01*self.dbangles[ndb, mdb, pdb] # Bool to check for angle agreement to some upper bound.
+                                            lowerangle = self.imangles[nim, m, pim] >= 0.99*self.dbangles[ndb, mdb, pdb] # Bool to check for angle agreement to some lower bound.
+                                            if upperratio and lowerratio and upperangle and lowerangle: # Checks if all the bools are true.
+                                                matches[m] = matches[m]+1 # Adds one to the amount of matches found for this star.
+                                                
+        print(matches)
         plt.show() # Shows the image.
         
         
