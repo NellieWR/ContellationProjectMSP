@@ -263,7 +263,7 @@ class ConstellationFinder:
                                         #print(self.imratios[nim, brightest, pim])
                                         #print(self.dbratios[ndb, mdb, pdb])
                                         count = count +1 # Add one to the matching ratio counter.
-                                        plt.scatter(x=[self.centers[nim,1],self.centers[pim,1]],y=[self.centers[nim,0],self.centers[pim,0]],c = 'r', s = 10) # Adds the stars that make the ratio to the scatter plot.
+                                        #plt.scatter(x=[self.centers[nim,1],self.centers[pim,1]],y=[self.centers[nim,0],self.centers[pim,0]],c = 'r', s = 10) # Adds the stars that make the ratio to the scatter plot.
                                         stars[nim, 0] = stars[nim, 0]+1
                                         stars[pim, 0] = stars[pim, 0]+1
         print(count)
@@ -288,6 +288,15 @@ class ConstellationFinder:
                                                 matches[m] = matches[m]+1 # Adds one to the amount of matches found for this star.
                                                 
         print(matches)
+        matchesperstar = (self.dbratios.shape[0]-1)*(self.dbratios.shape[0]-2) # Calculates how many ratios one star can be a part of.
+        percentages = np.zeros((length, 1)) # Array that will store the percentage of ratios that match for each star.
+        for n in range(length): # For-loop to calculate the percentage of matches that a star made w.r.t. how many it could have made.
+            percentages[n] = matches[n]/matchesperstar*100 # Calculates a percentage.
+        print(percentages)
+        
+        for n in range(length): # For-loop to plot the stars that have made more than 50% of ratio matches it could have made.
+            if percentages[n]>=50: # Checks the percentage threshold.
+                plt.scatter(x=self.centers[n, 1], y=self.centers[n, 0], c = 'r', s = 10) # Plots a star
         plt.show() # Shows the image.
         
         
