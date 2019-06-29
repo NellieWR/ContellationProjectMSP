@@ -14,7 +14,7 @@ import csv
 import math
 
 
-def FindStars(name):
+def FindStars(name, test = 'test'):
     print("ProcessImage")
     npim = ProcessImage(name)
     
@@ -33,6 +33,7 @@ def FindStars(name):
     
     print("ReadDir")              
     constellations = ReadDir()
+    print(test)
 
     return npim, clid, clim, centers, constellations, ratios, angles
 
@@ -45,7 +46,7 @@ def OpenDatabase(filename):
     
     return distances, ratios, angles
 
-def ProcessImage(imagename):
+def ProcessImage(imagename, percent = 0.01):
     im = Image.open(imagename).convert("L") # Opens a .jpg file containing some picture of the night sky and converts it to grayscale.
     npim = np.array(im) # Converts the image to a numpy array
     dim = npim.shape # Takes the dimensions of theimage numpy array.
@@ -58,7 +59,6 @@ def ProcessImage(imagename):
             greyval[val] = greyval[val]+1 # Add one count to the amount of occurences of this greyscale value.
     
     pixn = dim[0]*dim[1] # Number of pixels.
-    percent = 0.01 #Percetage
     thresh = percent*pixn # Threshold of how many pixels to keep. Now set to 1 percent of all pixels.
     threshbool = False # Boolean to be used for the while-loop.
     ii = 255 # Reverse grayscale counter.
