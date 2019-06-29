@@ -14,7 +14,7 @@ import csv
 import math
 
 
-def FindStars(name, test = 'test'):
+def FindStars(name):
     print("ProcessImage")
     npim = ProcessImage(name)
     
@@ -33,7 +33,6 @@ def FindStars(name, test = 'test'):
     
     print("ReadDir")              
     constellations = ReadDir()
-    print(test)
 
     return npim, clid, clim, centers, constellations, ratios, angles
 
@@ -106,7 +105,7 @@ def FrameMaker(npim):
     
     return clid, clim
 
-def ClusterStart(clid, clim, npim):
+def ClusterStart(clid, clim, npim, size_limit = 10):
     cont = True # State variable that indicates if there has been a change in the clustering
     inc  = 1
     while cont:
@@ -146,7 +145,6 @@ def ClusterStart(clid, clim, npim):
     
     C = np.zeros((0,4))
     
-    size_limit = 10 # Threshold for cluster size 
     for n in range(centers.shape[0]):
         if centers[n,3] > size_limit: 
             C = np.append(C,np.array([centers[n,:]]), axis = 0)
@@ -229,13 +227,14 @@ def ReadDir(): # Finds the .csv files
     return files
 
 class ConstellationFinder:
-    def __init__(self, imratios, dbratios, imangles, dbangles, centers, npim): # Automatically called when an instance of this object is created.
+    def __init__(self, imratios, dbratios, imangles, dbangles, centers, npim, threshpercent = 50): # Automatically called when an instance of this object is created.
         self.imratios = imratios
         self.dbratios = dbratios
         self.centers = centers
         self.imangles = imangles
         self.dbangles = dbangles
         self.npim = npim
+        self.threshpercent = threshpercent
     
     def CompareRatios(self):
         length = self.centers.shape[0] # Takes the amount of stars identified in the image.
@@ -295,7 +294,7 @@ class ConstellationFinder:
         print(percentages)
         
         for n in range(length): # For-loop to plot the stars that have made more than 50% of ratio matches it could have made.
-            if percentages[n]>=50: # Checks the percentage threshold.
+            if percentages[n]>=self.threshpercent: # Checks the percentage threshold.
                 plt.scatter(x=self.centers[n, 1], y=self.centers[n, 0], c = 'r', s = 10) # Plots a star
         plt.show() # Shows the image.
         
