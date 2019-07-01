@@ -14,15 +14,15 @@ import csv
 import math
 
 
-def FindStars(name):
+def FindStars(name, perc = 0.01, sizelim = 10):
     print("ProcessImage")
-    npim = ProcessImage(name)
+    npim = ProcessImage(name, percent = perc)
     
     print("FrameMaker")
     clid, clim = FrameMaker(npim)
     
     print("ClusterStart")
-    clid, centers = ClusterStart(clid, clim, npim)
+    clid, centers = ClusterStart(clid, clim, npim, size_limit = sizelim)
     
     print("Stars found: ", centers.shape[0])
     
